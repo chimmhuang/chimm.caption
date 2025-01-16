@@ -1,0 +1,50 @@
+# 项目简介
+- Chimm.Caption 是一个基于 Java 语言编写的，可在 windows/macos/linux 上运行的字幕转换工具，支持多种字幕格式，包括 srt、sbv、bcc 等。
+
+# 核心功能
+- 上传一个字幕文件，如 bcc 格式的文件，选择需要转换的格式，如 srt 格式  
+- 点击转换按钮，等待转换完成
+- 下载转换后的字幕文件
+
+# 技术架构
+- java 21
+- 使用 maven 进行项目管理
+- import 类禁止使用 *，必须明确指定要导入的类
+
+# 目录结构
+src/
+├── main/
+│   ├── java/
+│   │   └── com/
+│   │       └── github/
+│   │           └── chimmhuang/
+│   │               └── caption/ 项目基础包路径
+│   └── resources/
+│       └── i18n/
+│           ├── messages_en.properties
+│           └── messages_zh_CN.properties
+
+# 代码规范
+## 命名规范
+- 类名使用驼峰命名法，首字母大写
+- 方法名使用驼峰命名法，首字母小写
+- 变量名使用驼峰命名法，首字母小写
+- 常量名使用驼峰命名法，首字母大写
+- 包名使用小写字母，多个单词之间用点分隔
+- 文件名使用小写字母，多个单词之间用点分隔
+- 代码尽量符合 sonar 规范
+
+## 国际化规范
+- 支持 en、zh_CN 两种语言
+- 翻译文件放置于 src/main/resources/i18n 目录下
+
+## git 提交规范
+- ${type}: ${description}
+- type: 
+  - feat: 新功能
+  - fix: 修复问题
+  - docs: 文档
+  - style: 格式
+  - refactor: 重构
+  - perf: 性能优化
+  - test: 测试
