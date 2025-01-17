@@ -252,7 +252,7 @@ public class MainWindow extends JFrame {
         selectButton.setPreferredSize(new Dimension(BUTTON_WIDTH, BUTTON_HEIGHT));
         styleButton(selectButton);
         selectButton.addActionListener(e -> {
-            JFileChooser fileChooser = new JFileChooser();
+            JFileChooser fileChooser = createFileChooser();
             int result = fileChooser.showOpenDialog(this);
             if (result == JFileChooser.APPROVE_OPTION) {
                 handleFileSelection(fileChooser.getSelectedFile());
@@ -459,5 +459,42 @@ public class MainWindow extends JFrame {
             LOGGER.log(Level.WARNING, "Failed to read version from pom.properties", e);
         }
         return "unknown";
+    }
+    
+    /**
+     * 创建文件选择器
+     */
+    private JFileChooser createFileChooser() {
+        JFileChooser fileChooser = new JFileChooser();
+        // 添加文件过滤器
+        fileChooser.setFileFilter(new javax.swing.filechooser.FileFilter() {
+            @Override
+            public boolean accept(File f) {
+                if (f.isDirectory()) {
+                    return true;
+                }
+                String name = f.getName().toLowerCase();
+                for (String format : SUPPORTED_FORMATS) {
+                    if (name.endsWith("." + format)) {
+                        return true;
+                    }
+                }
+                return false;
+            }
+
+            @Override
+            public String getDescription() {
+                return bundle.getString("file.filter.description");
+            }
+        });
+        
+        // 设置文件选择器的按钮文本
+        UIManager.put("FileChooser.openButtonText", bundle.getString("file.chooser.open"));
+        UIManager.put("FileChooser.cancelButtonText", bundle.getString("file.chooser.cancel"));
+        UIManager.put("FileChooser.lookInLabelText", bundle.getString("file.chooser.look.in"));
+        UIManager.put("FileChooser.fileNameLabelText", bundle.getString("file.chooser.file.name"));
+        UIManager.put("FileChooser.filesOfTypeLabelText", bundle.getString("file.chooser.files.of.type"));
+        
+        return fileChooser;
     }
 } 
