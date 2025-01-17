@@ -68,9 +68,7 @@ public class BccHandler implements CaptionHandler {
     
     private void setLocationIfPresent(BccCaption.BccBody body, CommonCaption commonCaption) {
         if (body.getLocation() != null) {
-            commonCaption.setLocation(String.format("x=%d,y=%d",
-                    body.getLocation().getX(),
-                    body.getLocation().getY()));
+            commonCaption.setLocation(String.valueOf(body.getLocation()));
         }
     }
     
@@ -128,35 +126,11 @@ public class BccHandler implements CaptionHandler {
     
     private void setBodyLocationIfPresent(CommonCaption caption, BccCaption.BccBody body) {
         if (caption.getLocation() != null) {
-            BccCaption.Location location = parseLocation(caption.getLocation());
-            body.setLocation(location);
-        }
-    }
-    
-    private BccCaption.Location parseLocation(String locationStr) {
-        BccCaption.Location location = new BccCaption.Location();
-        String[] parts = locationStr.split(",");
-        
-        for (String part : parts) {
-            String[] keyValue = part.split("=");
-            if (keyValue.length == 2) {
-                setLocationCoordinate(location, keyValue[0], keyValue[1]);
+            try {
+                body.setLocation(Integer.parseInt(caption.getLocation()));
+            } catch (NumberFormatException e) {
+                LOGGER.log(Level.WARNING, "Invalid location value: {0}", caption.getLocation());
             }
-        }
-        
-        return location;
-    }
-    
-    private void setLocationCoordinate(BccCaption.Location location, String key, String value) {
-        try {
-            int coordinate = Integer.parseInt(value);
-            if ("x".equals(key)) {
-                location.setX(coordinate);
-            } else if ("y".equals(key)) {
-                location.setY(coordinate);
-            }
-        } catch (NumberFormatException e) {
-            LOGGER.log(Level.WARNING, "Invalid coordinate value: {0}", value);
         }
     }
     

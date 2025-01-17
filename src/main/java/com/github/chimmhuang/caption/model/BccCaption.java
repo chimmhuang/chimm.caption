@@ -15,7 +15,7 @@ public class BccCaption {
         private Double from;    // 开始时间（秒）
         private Double to;      // 结束时间（秒）
         private String content; // 字幕内容
-        private Location location; // 位置信息
+        private Integer location; // 位置信息（1-9，代表9个方位）
         private String fontSize;   // 字体大小
         private String color;      // 字体颜色
         private String alpha;      // 透明度

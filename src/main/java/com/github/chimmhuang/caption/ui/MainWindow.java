@@ -26,12 +26,13 @@ import java.awt.RenderingHints;
  * 字幕转换工具主窗口
  */
 public class MainWindow extends JFrame {
+    private static final String VERSION = readVersion();
     private static final Logger LOGGER = Logger.getLogger(MainWindow.class.getName());
     private static final int WINDOW_WIDTH = 800;
     private static final int WINDOW_HEIGHT = 300;
     private static final int BUTTON_WIDTH = 120;
     private static final int BUTTON_HEIGHT = 30;
-    private static final String[] SUPPORTED_FORMATS = {"srt", "sbv", "bcc"};
+    private static final String[] SUPPORTED_FORMATS = {"bcc", "srt", "sbv"};
     private static final String[] SUPPORTED_LANGUAGES = {"zh_CN", "en"};
     
     private ResourceBundle bundle;
@@ -132,18 +133,36 @@ public class MainWindow extends JFrame {
         
         JPanel progressPanel = createProgressPanel();
         JPanel buttonPanel = createButtonPanel();
-        JPanel languagePanel = createLanguagePanel();
+        JPanel bottomPanel = createBottomPanel();  // 创建底部面板
         
         // 设置所有面板为透明
         progressPanel.setOpaque(false);
         buttonPanel.setOpaque(false);
-        languagePanel.setOpaque(false);
+        bottomPanel.setOpaque(false);
         
         mainPanel.add(progressPanel, BorderLayout.NORTH);
         mainPanel.add(buttonPanel, BorderLayout.CENTER);
-        mainPanel.add(languagePanel, BorderLayout.SOUTH);
+        mainPanel.add(bottomPanel, BorderLayout.SOUTH);
         
         return mainPanel;
+    }
+    
+    private JPanel createBottomPanel() {
+        JPanel bottomPanel = new JPanel(new BorderLayout());
+        bottomPanel.setOpaque(false);
+        
+        // 版本号标签（左侧）
+        JLabel versionLabel = new JLabel("v" + VERSION);
+        versionLabel.setForeground(Color.BLACK);
+        versionLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 10));
+        
+        // 语言选择面板（右侧）
+        JPanel languagePanel = createLanguagePanel();
+        
+        bottomPanel.add(versionLabel, BorderLayout.WEST);
+        bottomPanel.add(languagePanel, BorderLayout.EAST);
+        
+        return bottomPanel;
     }
     
     private JPanel createLanguagePanel() {
@@ -203,20 +222,32 @@ public class MainWindow extends JFrame {
     }
     
     private JPanel createButtonPanel() {
-        JPanel buttonPanel = new JPanel();
-        buttonPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 30, 15));
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 0));
         buttonPanel.setOpaque(false);
         
-        selectButton = createButton("app.upload", this::selectFile);
-        JPanel formatPanel = createFormatPanel();
-        convertButton = createButton("app.convert", this::convertFile);
-        
-        // 设置按钮样式
+        selectButton = new JButton(bundle.getString("app.upload"));
+        selectButton.setPreferredSize(new Dimension(BUTTON_WIDTH, BUTTON_HEIGHT));
         styleButton(selectButton);
+        selectButton.addActionListener(e -> {
+            JFileChooser fileChooser = new JFileChooser();
+            int result = fileChooser.showOpenDialog(this);
+            if (result == JFileChooser.APPROVE_OPTION) {
+                handleFileSelection(fileChooser.getSelectedFile());
+            }
+        });
+        
+        // 添加格式选择面板
+        JPanel formatPanel = createFormatPanel();
+        formatPanel.setOpaque(false);
+        
+        convertButton = new JButton(bundle.getString("app.convert"));
+        convertButton.setPreferredSize(new Dimension(BUTTON_WIDTH, BUTTON_HEIGHT));
         styleButton(convertButton);
+        convertButton.setEnabled(false);
+        convertButton.addActionListener(e -> startConversion());
         
         buttonPanel.add(selectButton);
-        buttonPanel.add(formatPanel);
+        buttonPanel.add(formatPanel);  // 添加格式选择面板
         buttonPanel.add(convertButton);
         
         return buttonPanel;
@@ -372,5 +403,67 @@ public class MainWindow extends JFrame {
         String originalName = inputFile.getName();
         String newName = originalName.substring(0, originalName.lastIndexOf('.')) + "." + targetFormat;
         return new File(inputFile.getParent(), newName);
+    }
+    
+    /**
+     * 更新目标格式下拉框选项
+     * @param sourceFormat 源文件格式
+     */
+    private void updateTargetFormats(String sourceFormat) {
+        targetFormatCombo.removeAllItems();
+        for (String format : SUPPORTED_FORMATS) {
+            if (!format.equals(sourceFormat)) {
+                targetFormatCombo.addItem(format);
+            }
+        }
+        if (targetFormatCombo.getItemCount() > 0) {
+            targetFormatCombo.setSelectedIndex(0);
+        }
+    }
+    
+    private void handleFileSelection(File file) {
+        selectedFile = file;
+        fileNameLabel.setText(file.getName());
+        String sourceFormat = getSourceFormat(file);
+        updateTargetFormats(sourceFormat);
+        convertButton.setEnabled(true);
+    }
+    
+    private void startConversion() {
+        convertButton.setEnabled(false);
+        progressBar.setValue(0);
+        progressBar.setString("Converting...");
+        
+        SwingWorker<File, Integer> worker = createConversionWorker();
+        worker.addPropertyChangeListener(evt -> {
+            if ("progress".equals(evt.getPropertyName())) {
+                progressBar.setValue((Integer) evt.getNewValue());
+            }
+        });
+        worker.execute();
+    }
+    
+    /**
+     * 从 pom.xml 中读取版本号
+     * @return 版本号，如果读取失败则返回 "unknown"
+     */
+    private static String readVersion() {
+        try {
+            // 获取 pom.properties 文件路径
+            String pomPath = MainWindow.class.getPackage().getName().replace('.', '/');
+            String resourcePath = "/META-INF/maven/com.github.chimmhuang/chimm-caption/pom.properties";
+            
+            // 读取版本号
+            java.util.Properties properties = new java.util.Properties();
+            try (java.io.InputStream inputStream = MainWindow.class.getResourceAsStream(resourcePath)) {
+                if (inputStream != null) {
+                    properties.load(inputStream);
+                    return properties.getProperty("version", "unknown");
+                }
+            }
+        } catch (Exception e) {
+            LOGGER.log(Level.WARNING, "Failed to read version from pom.properties", e);
+        }
+        return "unknown";
     }
 } 
