@@ -14,6 +14,11 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <jpackage.version>21</jpackage.version>
         <main.class>com.github.chimmhuang.caption.ChimmCaption</main.class>
+        <app.name>Chimm.Caption</app.name>
+        <app.version>1.0.0</app.version>
+        <app.vendor>Chimm Huang</app.vendor>
+        <app.description>字幕转换工具</app.description>
+        <app.copyright>Copyright (c) 2025 Chimm Huang</app.copyright>
     </properties>
 
     <dependencies>
@@ -53,25 +58,190 @@
             <!-- 打包插件 -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-assembly-plugin</artifactId>
-                <version>3.6.0</version>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>3.3.0</version>
                 <configuration>
                     <archive>
                         <manifest>
                             <mainClass>${main.class}</mainClass>
+                            <addClasspath>true</addClasspath>
                         </manifest>
                     </archive>
-                    <descriptorRefs>
-                        <descriptorRef>jar-with-dependencies</descriptorRef>
-                    </descriptorRefs>
                 </configuration>
+            </plugin>
+
+            <!-- 依赖拷贝插件 -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>3.6.1</version>
                 <executions>
                     <execution>
-                        <id>make-assembly</id>
+                        <id>copy-dependencies</id>
                         <phase>package</phase>
                         <goals>
-                            <goal>single</goal>
+                            <goal>copy-dependencies</goal>
                         </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/lib</outputDirectory>
+                            <excludeScope>provided</excludeScope>
+                            <excludeScope>test</excludeScope>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- jpackage 打包插件 -->
+            <plugin>
+                <groupId>org.moditect</groupId>
+                <artifactId>moditect-maven-plugin</artifactId>
+                <version>1.0.0.Final</version>
+                <executions>
+                    <execution>
+                        <id>create-runtime-image</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>create-runtime-image</goal>
+                        </goals>
+                        <configuration>
+                            <modulePath>
+                                <path>${project.build.directory}/lib</path>
+                            </modulePath>
+                            <modules>
+                                <module>java.base</module>
+                                <module>java.desktop</module>
+                                <module>java.logging</module>
+                            </modules>
+                            <launcher>
+                                <name>${app.name}</name>
+                                <module>${project.groupId}</module>
+                            </launcher>
+                            <compression>2</compression>
+                            <stripDebug>true</stripDebug>
+                            <outputDirectory>${project.build.directory}/jlink</outputDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- 多平台打包插件 -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>3.1.1</version>
+                <executions>
+                    <!-- Windows 打包 -->
+                    <execution>
+                        <id>package-win</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <executable>jpackage</executable>
+                            <arguments>
+                                <argument>--type</argument>
+                                <argument>app-image</argument>
+                                <argument>--name</argument>
+                                <argument>${app.name}</argument>
+                                <argument>--app-version</argument>
+                                <argument>${app.version}</argument>
+                                <argument>--vendor</argument>
+                                <argument>${app.vendor}</argument>
+                                <argument>--copyright</argument>
+                                <argument>${app.copyright}</argument>
+                                <argument>--description</argument>
+                                <argument>${app.description}</argument>
+                                <argument>--input</argument>
+                                <argument>${project.build.directory}/lib</argument>
+                                <argument>--main-jar</argument>
+                                <argument>${project.build.finalName}.jar</argument>
+                                <argument>--main-class</argument>
+                                <argument>${main.class}</argument>
+                                <argument>--dest</argument>
+                                <argument>${project.build.directory}/dist/win</argument>
+                                <argument>--win-dir-chooser</argument>
+                                <argument>--win-menu</argument>
+                                <argument>--win-shortcut</argument>
+                                <argument>--icon</argument>
+                                <argument>src/main/resources/icon.ico</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+
+                    <!-- macOS 打包 -->
+                    <execution>
+                        <id>package-mac</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <executable>jpackage</executable>
+                            <arguments>
+                                <argument>--type</argument>
+                                <argument>app-image</argument>
+                                <argument>--name</argument>
+                                <argument>${app.name}</argument>
+                                <argument>--app-version</argument>
+                                <argument>${app.version}</argument>
+                                <argument>--vendor</argument>
+                                <argument>${app.vendor}</argument>
+                                <argument>--copyright</argument>
+                                <argument>${app.copyright}</argument>
+                                <argument>--description</argument>
+                                <argument>${app.description}</argument>
+                                <argument>--input</argument>
+                                <argument>${project.build.directory}/lib</argument>
+                                <argument>--main-jar</argument>
+                                <argument>${project.build.finalName}.jar</argument>
+                                <argument>--main-class</argument>
+                                <argument>${main.class}</argument>
+                                <argument>--dest</argument>
+                                <argument>${project.build.directory}/dist/mac</argument>
+                                <argument>--mac-package-name</argument>
+                                <argument>${app.name}</argument>
+                                <argument>--icon</argument>
+                                <argument>src/main/resources/icon.icns</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+
+                    <!-- Linux 打包 -->
+                    <execution>
+                        <id>package-linux</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <executable>jpackage</executable>
+                            <arguments>
+                                <argument>--type</argument>
+                                <argument>app-image</argument>
+                                <argument>--name</argument>
+                                <argument>${app.name}</argument>
+                                <argument>--app-version</argument>
+                                <argument>${app.version}</argument>
+                                <argument>--vendor</argument>
+                                <argument>${app.vendor}</argument>
+                                <argument>--copyright</argument>
+                                <argument>${app.copyright}</argument>
+                                <argument>--description</argument>
+                                <argument>${app.description}</argument>
+                                <argument>--input</argument>
+                                <argument>${project.build.directory}/lib</argument>
+                                <argument>--main-jar</argument>
+                                <argument>${project.build.finalName}.jar</argument>
+                                <argument>--main-class</argument>
+                                <argument>${main.class}</argument>
+                                <argument>--dest</argument>
+                                <argument>${project.build.directory}/dist/linux</argument>
+                                <argument>--linux-shortcut</argument>
+                                <argument>--icon</argument>
+                                <argument>src/main/resources/icon.png</argument>
+                            </arguments>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>
