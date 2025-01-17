@@ -1,3 +1,25 @@
+/*
+ * Copyright (c) 2025 Chimm Huang
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
 package com.github.chimmhuang.caption.ui;
 
 import com.github.chimmhuang.caption.factory.CaptionFactory;
@@ -24,6 +46,7 @@ import java.awt.RenderingHints;
 
 /**
  * 字幕转换工具主窗口
+ * @author Chimm Huang
  */
 public class MainWindow extends JFrame {
     private static final String VERSION = readVersion();
@@ -261,13 +284,6 @@ public class MainWindow extends JFrame {
         button.setOpaque(false);
     }
     
-    private JButton createButton(String key, Runnable action) {
-        JButton button = new JButton(bundle.getString(key));
-        button.setPreferredSize(new Dimension(BUTTON_WIDTH, BUTTON_HEIGHT));
-        button.addActionListener(e -> action.run());
-        return button;
-    }
-    
     private JPanel createFormatPanel() {
         JPanel formatPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         formatPanel.setOpaque(false);
@@ -283,28 +299,6 @@ public class MainWindow extends JFrame {
         formatPanel.add(targetFormatCombo);
         
         return formatPanel;
-    }
-    
-    private void selectFile() {
-        JFileChooser fileChooser = new JFileChooser();
-        int result = fileChooser.showOpenDialog(this);
-        if (result == JFileChooser.APPROVE_OPTION) {
-            selectedFile = fileChooser.getSelectedFile();
-            fileNameLabel.setText("Selected file: " + selectedFile.getName());
-            progressBar.setValue(0);
-            progressBar.setString("Ready to convert");
-            LOGGER.log(Level.INFO, "Selected file: {0}", selectedFile.getAbsolutePath());
-        }
-    }
-    
-    private void convertFile() {
-        if (selectedFile == null) {
-            JOptionPane.showMessageDialog(this, "Please select a file first");
-            return;
-        }
-        
-        setComponentsEnabled(false);
-        createConversionWorker().execute();
     }
     
     private SwingWorker<File, Integer> createConversionWorker() {
