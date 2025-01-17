@@ -25,15 +25,21 @@ import java.util.Objects;
 import java.util.Locale;
 import java.util.logging.Logger;
 import java.util.logging.Level;
+import java.awt.GradientPaint;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Color;
+import java.awt.RenderingHints;
+import javax.swing.JComponent;
 
 /**
  * 字幕转换工具主窗口
  */
 public class MainWindow extends JFrame {
     private static final Logger LOGGER = Logger.getLogger(MainWindow.class.getName());
-    private static final int WINDOW_WIDTH = 600;
-    private static final int WINDOW_HEIGHT = 200;
-    private static final int BUTTON_WIDTH = 100;
+    private static final int WINDOW_WIDTH = 800;
+    private static final int WINDOW_HEIGHT = 300;
+    private static final int BUTTON_WIDTH = 120;
     private static final int BUTTON_HEIGHT = 30;
     private static final String[] SUPPORTED_FORMATS = {"srt", "sbv", "bcc"};
     private static final String[] SUPPORTED_LANGUAGES = {"zh_CN", "en"};
@@ -47,6 +53,9 @@ public class MainWindow extends JFrame {
     private JLabel formatLabel;
     private JButton selectButton;
     private JButton convertButton;
+    
+    private static final Color YOUTUBE_RED = new Color(255, 0, 0, 102);    // 40% 透明度的红色
+    private static final Color BILIBILI_BLUE = new Color(0, 161, 214, 102); // 40% 透明度的蓝色
     
     /**
      * 创建主窗口
@@ -66,29 +75,84 @@ public class MainWindow extends JFrame {
         setLayout(new BorderLayout(10, 10));
         setPreferredSize(new Dimension(WINDOW_WIDTH, WINDOW_HEIGHT));
         
+        // 使用渐变背景面板
         JPanel mainPanel = createMainPanel();
-        add(mainPanel);
+        mainPanel.setOpaque(false);  // 使面板透明，以显示渐变背景
+        
+        // 创建渐变背景
+        GradientPanel backgroundPanel = new GradientPanel();
+        backgroundPanel.setLayout(new BorderLayout());
+        backgroundPanel.add(mainPanel);
+        
+        // 使用内容面板
+        setContentPane(backgroundPanel);
+        
         pack();
         setLocationRelativeTo(null);
+    }
+    
+    /**
+     * 创建渐变背景面板
+     */
+    private static class GradientPanel extends JPanel {
+        public GradientPanel() {
+            setOpaque(true);
+        }
+        
+        @Override
+        protected void paintComponent(Graphics g) {
+            super.paintComponent(g);
+            Graphics2D g2d = (Graphics2D) g.create();
+            g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+            g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            
+            int w = getWidth();
+            int h = getHeight();
+            
+            // 创建渐变色背景
+            GradientPaint gradient = new GradientPaint(0, 0, YOUTUBE_RED, w, 0, BILIBILI_BLUE);
+            g2d.setPaint(gradient);
+            g2d.fillRect(0, 0, w, h);
+            
+            // 增加白色背景的不透明度，使文字更清晰
+            g2d.setColor(new Color(255, 255, 255, 230)); // 90% 不透明的白色
+            g2d.fillRect(0, 0, w, h);
+            
+            g2d.dispose();
+        }
     }
     
     private JPanel createMainPanel() {
         JPanel mainPanel = new JPanel();
         mainPanel.setLayout(new BorderLayout(10, 10));
-        mainPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        mainPanel.setBorder(BorderFactory.createEmptyBorder(30, 30, 30, 30));
+        mainPanel.setOpaque(false);
         
-        mainPanel.add(createProgressPanel(), BorderLayout.NORTH);
-        mainPanel.add(createButtonPanel(), BorderLayout.CENTER);
-        mainPanel.add(createLanguagePanel(), BorderLayout.SOUTH);
+        JPanel progressPanel = createProgressPanel();
+        JPanel buttonPanel = createButtonPanel();
+        JPanel languagePanel = createLanguagePanel();
+        
+        // 设置所有面板为透明
+        progressPanel.setOpaque(false);
+        buttonPanel.setOpaque(false);
+        languagePanel.setOpaque(false);
+        
+        mainPanel.add(progressPanel, BorderLayout.NORTH);
+        mainPanel.add(buttonPanel, BorderLayout.CENTER);
+        mainPanel.add(languagePanel, BorderLayout.SOUTH);
         
         return mainPanel;
     }
     
     private JPanel createLanguagePanel() {
         JPanel languagePanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        languagePanel.setOpaque(false);
+        
         languageCombo = new JComboBox<>(SUPPORTED_LANGUAGES);
         languageCombo.setSelectedItem(Locale.getDefault().toString());
         languageCombo.addActionListener(e -> switchLanguage());
+        languageCombo.setForeground(Color.BLACK);
+        
         languagePanel.add(languageCombo);
         return languagePanel;
     }
@@ -118,10 +182,18 @@ public class MainWindow extends JFrame {
     
     private JPanel createProgressPanel() {
         JPanel progressPanel = new JPanel(new BorderLayout(5, 5));
+        progressPanel.setOpaque(false);
+        
         progressBar = new JProgressBar(0, 100);
         progressBar.setStringPainted(true);
         progressBar.setString("Ready");
+        progressBar.setForeground(BILIBILI_BLUE);
+        progressBar.setBackground(new Color(255, 255, 255, 128));
+        progressBar.setForeground(Color.BLACK);
+        
         fileNameLabel = new JLabel(" ");
+        fileNameLabel.setForeground(Color.BLACK);
+        
         progressPanel.add(fileNameLabel, BorderLayout.NORTH);
         progressPanel.add(progressBar, BorderLayout.CENTER);
         return progressPanel;
@@ -129,17 +201,30 @@ public class MainWindow extends JFrame {
     
     private JPanel createButtonPanel() {
         JPanel buttonPanel = new JPanel();
-        buttonPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 20, 10));
+        buttonPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 30, 15));
+        buttonPanel.setOpaque(false);
         
         selectButton = createButton("app.upload", this::selectFile);
         JPanel formatPanel = createFormatPanel();
         convertButton = createButton("app.convert", this::convertFile);
+        
+        // 设置按钮样式
+        styleButton(selectButton);
+        styleButton(convertButton);
         
         buttonPanel.add(selectButton);
         buttonPanel.add(formatPanel);
         buttonPanel.add(convertButton);
         
         return buttonPanel;
+    }
+    
+    private void styleButton(JButton button) {
+        button.setForeground(Color.BLACK);
+        button.setContentAreaFilled(false);
+        button.setFocusPainted(false);
+        button.setBorderPainted(true);
+        button.setOpaque(false);
     }
     
     private JButton createButton(String key, Runnable action) {
@@ -150,11 +235,16 @@ public class MainWindow extends JFrame {
     }
     
     private JPanel createFormatPanel() {
+        JPanel formatPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        formatPanel.setOpaque(false);
+        
         targetFormatCombo = new JComboBox<>(SUPPORTED_FORMATS);
         targetFormatCombo.setPreferredSize(new Dimension(BUTTON_WIDTH, BUTTON_HEIGHT));
+        targetFormatCombo.setForeground(Color.BLACK);
         
         formatLabel = new JLabel(bundle.getString("app.format.target"));
-        JPanel formatPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        formatLabel.setForeground(Color.BLACK);
+        
         formatPanel.add(formatLabel);
         formatPanel.add(targetFormatCombo);
         
