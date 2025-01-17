@@ -19,8 +19,7 @@ import java.util.logging.Level;
  */
 public class BccHandler implements CaptionHandler {
     private static final Logger LOGGER = Logger.getLogger(BccHandler.class.getName());
-    private static final String OUTPUT_FILENAME = "output.bcc";
-    
+
     private final ObjectMapper objectMapper;
     
     public BccHandler() {
@@ -38,7 +37,6 @@ public class BccHandler implements CaptionHandler {
             
             return convertToCommonCaptions(bccCaption);
         } catch (IOException e) {
-            LOGGER.log(Level.SEVERE, "Failed to read BCC file", e);
             throw new IllegalStateException("Failed to read BCC file", e);
         }
     }
@@ -85,13 +83,14 @@ public class BccHandler implements CaptionHandler {
     }
 
     @Override
-    public File exportCaption(List<CommonCaption> captions) {
+    public File exportCaption(List<CommonCaption> captions, File outputFile) {
         try {
             Objects.requireNonNull(captions, "Captions list must not be null");
-            LOGGER.log(Level.INFO, "Exporting {0} captions to BCC format", captions.size());
+            Objects.requireNonNull(outputFile, "Output file must not be null");
+            LOGGER.log(Level.INFO, "Exporting {0} captions to BCC format: {1}", 
+                new Object[]{captions.size(), outputFile.getAbsolutePath()});
             
             BccCaption bccCaption = convertToBccCaption(captions);
-            File outputFile = new File(OUTPUT_FILENAME);
             
             objectMapper.writerWithDefaultPrettyPrinter()
                     .writeValue(outputFile, bccCaption);
@@ -99,7 +98,6 @@ public class BccHandler implements CaptionHandler {
             LOGGER.log(Level.INFO, "Successfully exported to: {0}", outputFile.getAbsolutePath());
             return outputFile;
         } catch (IOException e) {
-            LOGGER.log(Level.SEVERE, "Failed to write BCC file", e);
             throw new IllegalStateException("Failed to write BCC file", e);
         }
     }

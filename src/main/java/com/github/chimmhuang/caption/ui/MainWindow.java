@@ -4,16 +4,7 @@ import com.github.chimmhuang.caption.factory.CaptionFactory;
 import com.github.chimmhuang.caption.handler.CaptionHandler;
 import com.github.chimmhuang.caption.model.CommonCaption;
 
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-import javax.swing.JButton;
-import javax.swing.JComboBox;
-import javax.swing.JLabel;
-import javax.swing.JProgressBar;
-import javax.swing.JFileChooser;
-import javax.swing.JOptionPane;
-import javax.swing.BorderFactory;
-import javax.swing.SwingWorker;
+import javax.swing.*;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.Dimension;
@@ -30,7 +21,6 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Color;
 import java.awt.RenderingHints;
-import javax.swing.JComponent;
 
 /**
  * 字幕转换工具主窗口
@@ -54,9 +44,9 @@ public class MainWindow extends JFrame {
     private JButton selectButton;
     private JButton convertButton;
     
-    private static final Color YOUTUBE_RED = new Color(255, 0, 0, 102);    // 40% 透明度的红色
-    private static final Color BILIBILI_BLUE = new Color(0, 161, 214, 102); // 40% 透明度的蓝色
-    
+    private static final Color YOUTUBE_RED = new Color(255, 0, 0, 179);    // 70% 透明度的红色
+    private static final Color BILIBILI_BLUE = new Color(0, 161, 214, 179); // 70% 透明度的蓝色
+
     /**
      * 创建主窗口
      */
@@ -71,9 +61,21 @@ public class MainWindow extends JFrame {
     
     private void initComponents() {
         setTitle(bundle.getString("app.title"));
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         setLayout(new BorderLayout(10, 10));
         setPreferredSize(new Dimension(WINDOW_WIDTH, WINDOW_HEIGHT));
+        
+        // 设置应用图标
+        try {
+            setIconImage(javax.imageio.ImageIO.read(
+                Objects.requireNonNull(
+                    getClass().getClassLoader().getResourceAsStream("icon.png"),
+                    "Icon resource not found"
+                )
+            ));
+        } catch (Exception e) {
+            LOGGER.log(Level.WARNING, "Failed to load application icon", e);
+        }
         
         // 使用渐变背景面板
         JPanel mainPanel = createMainPanel();
@@ -115,7 +117,7 @@ public class MainWindow extends JFrame {
             g2d.fillRect(0, 0, w, h);
             
             // 增加白色背景的不透明度，使文字更清晰
-            g2d.setColor(new Color(255, 255, 255, 230)); // 90% 不透明的白色
+            g2d.setColor(new Color(255, 255, 255, 204)); // 80% 不透明的白色
             g2d.fillRect(0, 0, w, h);
             
             g2d.dispose();
@@ -152,6 +154,7 @@ public class MainWindow extends JFrame {
         languageCombo.setSelectedItem(Locale.getDefault().toString());
         languageCombo.addActionListener(e -> switchLanguage());
         languageCombo.setForeground(Color.BLACK);
+        languageCombo.setPreferredSize(new Dimension(BUTTON_WIDTH, BUTTON_HEIGHT));
         
         languagePanel.add(languageCombo);
         return languagePanel;
@@ -283,6 +286,9 @@ public class MainWindow extends JFrame {
                     "Target format must not be null"
                 );
                 
+                // 获取输出文件路径
+                File outputFile = getOutputFile(selectedFile, targetFormat);
+                
                 publish(20);
                 CaptionHandler sourceHandler = CaptionFactory.getHandler(sourceFormat);
                 
@@ -293,7 +299,7 @@ public class MainWindow extends JFrame {
                 CaptionHandler targetHandler = CaptionFactory.getHandler(targetFormat);
                 
                 publish(80);
-                return targetHandler.exportCaption(captions);
+                return targetHandler.exportCaption(captions, outputFile);
             }
             
             @Override
@@ -354,5 +360,17 @@ public class MainWindow extends JFrame {
         }
         
         throw new IllegalArgumentException("Unsupported file format: " + name);
+    }
+    
+    /**
+     * 获取输出文件路径，与输入文件保持在同一目录
+     * @param inputFile 输入文件
+     * @param targetFormat 目标格式
+     * @return 输出文件对象
+     */
+    private File getOutputFile(File inputFile, String targetFormat) {
+        String originalName = inputFile.getName();
+        String newName = originalName.substring(0, originalName.lastIndexOf('.')) + "." + targetFormat;
+        return new File(inputFile.getParent(), newName);
     }
 } 

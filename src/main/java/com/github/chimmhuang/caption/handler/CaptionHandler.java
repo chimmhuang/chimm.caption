@@ -15,7 +15,8 @@ public interface CaptionHandler {
     /**
      * 导出字幕文件
      * @param captions 通用字幕对象列表
+     * @param outputFile 输出文件
      * @return 字幕文件
      */
-    File exportCaption(List<CommonCaption> captions);
+    File exportCaption(List<CommonCaption> captions, File outputFile);
 } 

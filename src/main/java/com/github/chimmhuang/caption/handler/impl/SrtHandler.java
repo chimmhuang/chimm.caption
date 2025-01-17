@@ -24,7 +24,6 @@ import java.util.logging.Level;
  */
 public class SrtHandler implements CaptionHandler {
     private static final Logger LOGGER = Logger.getLogger(SrtHandler.class.getName());
-    private static final String OUTPUT_FILENAME = "output.srt";
     private static final String TIME_SEPARATOR = " --> ";
     
     @Override
@@ -36,7 +35,6 @@ public class SrtHandler implements CaptionHandler {
         try (BufferedReader reader = createReader(file)) {
             processFileContent(reader, commonCaptions);
         } catch (IOException e) {
-            LOGGER.log(Level.SEVERE, "Failed to read SRT file", e);
             throw new IllegalStateException("Failed to read SRT file", e);
         }
         
@@ -112,16 +110,16 @@ public class SrtHandler implements CaptionHandler {
     }
 
     @Override
-    public File exportCaption(List<CommonCaption> captions) {
+    public File exportCaption(List<CommonCaption> captions, File outputFile) {
         Objects.requireNonNull(captions, "Captions list must not be null");
-        LOGGER.log(Level.INFO, "Exporting {0} captions to SRT format", captions.size());
+        Objects.requireNonNull(outputFile, "Output file must not be null");
+        LOGGER.log(Level.INFO, "Exporting {0} captions to SRT format: {1}", 
+            new Object[]{captions.size(), outputFile.getAbsolutePath()});
         
-        File outputFile = new File(OUTPUT_FILENAME);
         try (BufferedWriter writer = createWriter(outputFile)) {
             writeSubtitles(writer, captions);
             LOGGER.log(Level.INFO, "Successfully exported to: {0}", outputFile.getAbsolutePath());
         } catch (IOException e) {
-            LOGGER.log(Level.SEVERE, "Failed to write SRT file", e);
             throw new IllegalStateException("Failed to write SRT file", e);
         }
         
