@@ -35,7 +35,6 @@
 
 ## 功能展示
 ![example.gif](images/example.gif)
-<img src="./images/example.gif" width="600px" align="center" alt="how to  use"/>
 
 ## 技术栈
 
