@@ -124,7 +124,7 @@
                             <mainJar>${project.build.finalName}-jar-with-dependencies.jar</mainJar>
                             <input>${project.build.directory}</input>
                             <temp>/tmp/jpackage-temp-${project.artifactId}</temp>
-                            <destination>${project.build.directory}/dist/win</destination>
+                            <destination>/tmp/jpackage-out-${project.artifactId}</destination>
                             <icon>src/main/resources/icon.ico</icon>
                             <type>EXE</type>
                             <winConsole>false</winConsole>
@@ -277,7 +277,7 @@
                             <mainJar>${project.build.finalName}-jar-with-dependencies.jar</mainJar>
                             <input>${project.build.directory}</input>
                             <temp>/tmp/jpackage-temp-${project.artifactId}</temp>
-                            <destination>${project.build.directory}/dist/linux</destination>
+                            <destination>/tmp/jpackage-out-${project.artifactId}</destination>
                             <icon>src/main/resources/icon.png</icon>
                             <type>DEB</type>
                             <javaOptions>
