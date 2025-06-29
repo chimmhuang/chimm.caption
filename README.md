@@ -34,7 +34,7 @@
 - 输出文件自动保存在源文件目录
 
 ## 功能展示
-<img src="./images/example.gif" width="250px" align="center" />
+<img src="./images/example.gif" width="250px" align="center"  alt="how to use"/>
 
 ## 技术栈
 
