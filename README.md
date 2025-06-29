@@ -33,6 +33,9 @@
 - 实时转换进度显示
 - 输出文件自动保存在源文件目录
 
+## 功能展示
+<img src="./images/example.gif" width="250px" align="center" />
+
 ## 技术栈
 
 - Java 21
