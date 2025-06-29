@@ -229,10 +229,14 @@
                         <configuration>
                             <name>${app.name}</name>
                             <appVersion>${app.version}</appVersion>
+                            <vendor>${app.vendor}</vendor>
+                            <copyright>${app.copyright}</copyright>
+                            <description>${app.description}</description>
                             <type>DMG</type>
                             <appImage>${project.build.directory}/dist/mac/Chimm.Caption.app</appImage>
                             <destination>${project.build.directory}/dist/mac</destination>
                             <temp>/tmp/jpackage-temp-dmg-${project.artifactId}</temp>
+                            <icon>src/main/resources/icon.icns</icon>
                         </configuration>
                         <executions>
                             <execution>
