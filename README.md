@@ -155,8 +155,6 @@ mvn clean package -P mac
 # Linux 平台打包
 mvn clean package -P linux
 
-# macOS DMG 安装包打包（需要先有 .app 文件）
-mvn package -P mac-dmg
 ```
 
 ### 打包配置说明
