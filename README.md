@@ -149,6 +149,9 @@ mvn clean package -P windows
 # macOS 平台打包
 mvn clean package -P mac
 
+# macOS 执行命令打包 DMG
+/Users/chimmhuang/Java/jdk-21.jdk/Contents/Home/bin/jpackage --type dmg --name "Chimm.Caption" --app-version 1.0.0 --copyright "Copyright (c) 2025 Chimm Huang" --description "字幕转换工具" --icon src/main/resources/icon.icns --app-image target/dist/mac/Chimm.Caption.app --dest target/dist/mac
+
 # Linux 平台打包
 mvn clean package -P linux
 
