@@ -110,6 +110,7 @@
             </activation>
             <build>
                 <plugins>
+                    <!-- jpackage 插件 - 生成单个EXE程序 -->
                     <plugin>
                         <groupId>org.panteleyev</groupId>
                         <artifactId>jpackage-maven-plugin</artifactId>
@@ -123,10 +124,10 @@
                             <mainClass>${main.class}</mainClass>
                             <mainJar>${project.build.finalName}-jar-with-dependencies.jar</mainJar>
                             <input>${project.build.directory}</input>
-                            <temp>/tmp/jpackage-temp-${project.artifactId}</temp>
-                            <destination>/tmp/jpackage-out-${project.artifactId}</destination>
+                            <temp>E:\tmp\jpackage-temp-${project.artifactId}</temp>
+                            <destination>E:\tmp\jpackage-out-${project.artifactId}</destination>
                             <icon>src/main/resources/icon.ico</icon>
-                            <type>EXE</type>
+                            <type>APP_IMAGE</type>
                             <winConsole>false</winConsole>
                             <javaOptions>
                                 <option>-Dfile.encoding=UTF-8</option>
@@ -142,26 +143,29 @@
                             </execution>
                         </executions>
                     </plugin>
-                    <!-- 添加拷贝插件 -->
+                    
+                    <!-- 复制文件到发布目录 -->
                     <plugin>
                         <artifactId>maven-antrun-plugin</artifactId>
                         <version>3.1.0</version>
                         <executions>
                             <execution>
+                                <id>copy-files</id>
                                 <phase>package</phase>
-                                <configuration>
-                                    <target>
-                                        <mkdir dir="${project.build.directory}/dist/win"/>
-                                        <copy todir="${project.build.directory}/dist/win">
-                                            <fileset dir="/tmp/jpackage-out-${project.artifactId}"/>
-                                        </copy>
-                                        <delete dir="/tmp/jpackage-out-${project.artifactId}"/>
-                                        <delete dir="/tmp/jpackage-temp-${project.artifactId}"/>
-                                    </target>
-                                </configuration>
                                 <goals>
                                     <goal>run</goal>
                                 </goals>
+                                <configuration>
+                                    <target>
+                                        <echo message="Copying jpackage APP_IMAGE output to dist directory"/>
+                                        <mkdir dir="${project.build.directory}/dist/win"/>
+                                        <copy todir="${project.build.directory}/dist/win">
+                                            <fileset dir="E:\tmp\jpackage-out-${project.artifactId}"/>
+                                        </copy>
+                                        <delete dir="E:\tmp\jpackage-out-${project.artifactId}"/>
+                                        <delete dir="E:\tmp\jpackage-temp-${project.artifactId}"/>
+                                    </target>
+                                </configuration>
                             </execution>
                         </executions>
                     </plugin>
@@ -192,8 +196,8 @@
                             <mainClass>${main.class}</mainClass>
                             <mainJar>${project.build.finalName}-jar-with-dependencies.jar</mainJar>
                             <input>${project.build.directory}</input>
-                            <temp>/tmp/jpackage-temp-${project.artifactId}</temp>
-                            <destination>/tmp/jpackage-out-${project.artifactId}</destination>
+                            <temp>E:\tmp\jpackage-temp-${project.artifactId}</temp>
+                            <destination>E:\tmp\jpackage-out-${project.artifactId}</destination>
                             <icon>src/main/resources/icon.icns</icon>
                             <type>APP_IMAGE</type>
                             <javaOptions>
@@ -221,13 +225,13 @@
                                     <target>
                                         <mkdir dir="${project.build.directory}/dist/mac"/>
                                         <copy todir="${project.build.directory}/dist/mac">
-                                            <fileset dir="/tmp/jpackage-out-${project.artifactId}"/>
+                                            <fileset dir="E:\tmp\jpackage-out-${project.artifactId}"/>
                                         </copy>
                                         <chmod perm="755" type="file">
                                             <fileset dir="${project.build.directory}/dist/mac" includes="**/Contents/MacOS/*"/>
                                         </chmod>
-                                        <delete dir="/tmp/jpackage-out-${project.artifactId}"/>
-                                        <delete dir="/tmp/jpackage-temp-${project.artifactId}"/>
+                                        <delete dir="E:\tmp\jpackage-out-${project.artifactId}"/>
+                                        <delete dir="E:\tmp\jpackage-temp-${project.artifactId}"/>
                                     </target>
                                 </configuration>
                                 <goals>
@@ -258,7 +262,7 @@
                             <type>DMG</type>
                             <appImage>${project.build.directory}/dist/mac/Chimm.Caption.app</appImage>
                             <destination>${project.build.directory}/dist/mac</destination>
-                            <temp>/tmp/jpackage-temp-dmg-${project.artifactId}</temp>
+                            <temp>E:\tmp\jpackage-temp-dmg-${project.artifactId}</temp>
                             <icon>src/main/resources/icon.icns</icon>
                         </configuration>
                         <executions>
@@ -299,8 +303,8 @@
                             <mainClass>${main.class}</mainClass>
                             <mainJar>${project.build.finalName}-jar-with-dependencies.jar</mainJar>
                             <input>${project.build.directory}</input>
-                            <temp>/tmp/jpackage-temp-${project.artifactId}</temp>
-                            <destination>/tmp/jpackage-out-${project.artifactId}</destination>
+                            <temp>E:\tmp\jpackage-temp-${project.artifactId}</temp>
+                            <destination>E:\tmp\jpackage-out-${project.artifactId}</destination>
                             <icon>src/main/resources/icon.png</icon>
                             <type>DEB</type>
                             <javaOptions>
@@ -328,10 +332,10 @@
                                     <target>
                                         <mkdir dir="${project.build.directory}/dist/linux"/>
                                         <copy todir="${project.build.directory}/dist/linux">
-                                            <fileset dir="/tmp/jpackage-out-${project.artifactId}"/>
+                                            <fileset dir="E:\tmp\jpackage-out-${project.artifactId}"/>
                                         </copy>
-                                        <delete dir="/tmp/jpackage-out-${project.artifactId}"/>
-                                        <delete dir="/tmp/jpackage-temp-${project.artifactId}"/>
+                                        <delete dir="E:\tmp\jpackage-out-${project.artifactId}"/>
+                                        <delete dir="E:\tmp\jpackage-temp-${project.artifactId}"/>
                                     </target>
                                 </configuration>
                                 <goals>
